@@ -9,3 +9,7 @@ class Admin(StatesGroup):
     new_recipe_name = State()
     new_recipe_content = State()
     new_recipe_link = State()
+
+
+class User(StatesGroup):
+    random = State()

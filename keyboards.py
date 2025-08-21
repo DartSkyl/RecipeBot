@@ -3,7 +3,9 @@ from aiogram.utils.keyboard import ReplyKeyboardMarkup, ReplyKeyboardBuilder
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton, InlineKeyboardMarkup
 
 
+# ====================
 # Общие клавиатуры
+# ====================
 
 
 async def main_menu(admin=False):
@@ -29,7 +31,10 @@ recipe_choice = InlineKeyboardMarkup(inline_keyboard=[
 ])
 
 
+# ====================
 # Для админов
+# ====================
+
 
 admin_menu = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text='Ссылки на источники')],

@@ -95,6 +95,11 @@ class BotBase:
             result = await connection.fetch(f"SELECT * FROM public.recipes WHERE category = '{category}';")
             return result
 
+    async def get_all_recipe(self) -> List[Record]:
+        async with self.pool.acquire() as connection:
+            result = await connection.fetch(f"SELECT * FROM public.recipes;")
+            return result
+
     async def remove_recipe(self, recipe_id):
         async with self.pool.acquire() as connection:
             await connection.execute(f"DELETE FROM public.recipes WHERE recipe_id = '{recipe_id}';")
