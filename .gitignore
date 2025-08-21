@@ -1,0 +1,8 @@
+/preview.py
+/.env
+/*.log
+/.idea/
+/__pycache__/
+/*.txt
+/utils/__pycache__/
+/handlers/__pycache__/

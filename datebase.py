@@ -1,0 +1,66 @@
+import asyncpg as apg
+from asyncpg import Record
+from asyncpg.exceptions import PostgresSyntaxError, UniqueViolationError
+
+
+class BotBase:
+    """Через данный класс реализованы конект с базой данных и методы взаимодействия с БД"""
+
+    def __init__(self, _db_user, _db_pass, _db_name, _db_host):
+        self.db_name = _db_name
+        self.db_user = _db_user
+        self.db_pass = _db_pass
+        self.db_host = _db_host
+        self.pool = None
+
+    async def connect(self):
+        """Для использования БД будем использовать пул соединений.
+        Иначе рискуем поймать asyncpg.exceptions._base.InterfaceError: cannot perform operation:
+        another operation is in progress. А нам это не надо"""
+        self.pool = await apg.create_pool(
+            database=self.db_name,
+            user=self.db_user,
+            password=self.db_pass,
+            host=self.db_host,
+            max_inactive_connection_lifetime=10,
+            min_size=1,
+            max_size=100
+        )
+
+    async def check_db_structure(self):
+        async with self.pool.acquire() as connection:
+            # Таблица со всеми ссылками
+            await connection.execute("CREATE TABLE IF NOT EXISTS recipe_links ("
+                                     "link_id VARCHAR(155) PRIMARY KEY,"
+                                     "url_name VARCHAR(155) NOT NULL,"
+                                     "url_content TEXT NOT NULL"
+                                     ");")
+
+    # ====================
+    # Операции со ссылками
+    # ====================
+
+    async def insert_new_url(self,
+                             link_id: str,
+                             url_name: str,
+                             url_content: str):
+
+        async with self.pool.acquire() as connection:
+            await connection.execute(
+                """
+                INSERT INTO public.recipe_links (link_id, url_name, url_content)
+                VALUES ($1, $2, $3)
+                """,
+                link_id,
+                url_name,
+                url_content
+            )
+
+    async def get_links(self):
+        async with self.pool.acquire() as connection:
+            result = await connection.fetch(f"SELECT * FROM public.recipe_links;")
+            return result
+
+    async def remove_link(self, link_id):
+        async with self.pool.acquire() as connection:
+            await connection.execute(f"DELETE FROM public.recipe_links WHERE link_id = '{link_id}';")
