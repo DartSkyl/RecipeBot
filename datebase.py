@@ -1,3 +1,5 @@
+from typing import List
+
 import asyncpg as apg
 from asyncpg import Record
 from asyncpg.exceptions import PostgresSyntaxError, UniqueViolationError
@@ -36,14 +38,20 @@ class BotBase:
                                      "url_content TEXT NOT NULL"
                                      ");")
 
+            # Таблица со всеми рецептами
+            await connection.execute("CREATE TABLE IF NOT EXISTS recipes ("
+                                     "recipe_id TEXT PRIMARY KEY,"
+                                     "recipe_name TEXT NOT NULL,"
+                                     "recipe_content TEXT NOT NULL,"
+                                     "recipe_url TEXT,"
+                                     "category VARCHAR(155)"
+                                     ");")
+
     # ====================
     # Операции со ссылками
     # ====================
 
-    async def insert_new_url(self,
-                             link_id: str,
-                             url_name: str,
-                             url_content: str):
+    async def insert_new_url(self, link_id: str, url_name: str, url_content: str):
 
         async with self.pool.acquire() as connection:
             await connection.execute(
@@ -51,12 +59,10 @@ class BotBase:
                 INSERT INTO public.recipe_links (link_id, url_name, url_content)
                 VALUES ($1, $2, $3)
                 """,
-                link_id,
-                url_name,
-                url_content
+                link_id, url_name, url_content
             )
 
-    async def get_links(self):
+    async def get_links(self) -> List[Record]:
         async with self.pool.acquire() as connection:
             result = await connection.fetch(f"SELECT * FROM public.recipe_links;")
             return result
@@ -64,3 +70,31 @@ class BotBase:
     async def remove_link(self, link_id):
         async with self.pool.acquire() as connection:
             await connection.execute(f"DELETE FROM public.recipe_links WHERE link_id = '{link_id}';")
+
+    # ====================
+    # Операции с рецептами
+    # ====================
+
+    async def add_new_recipe(self, recipe_id, recipe_name, recipe_content, recipe_url, category):
+        async with self.pool.acquire() as connection:
+            await connection.execute(
+                """
+                INSERT INTO public.recipes (recipe_id, recipe_name, recipe_content, recipe_url, category)
+                VALUES ($1, $2, $3, $4, $5)
+                """,
+                recipe_id, recipe_name, recipe_content, recipe_url, category
+            )
+
+    async def get_recipe_by_id(self, recipe_id) -> Record:
+        async with self.pool.acquire() as connection:
+            result = await connection.fetch(f"SELECT * FROM public.recipes WHERE recipe_id = '{recipe_id}';")
+            return result[0]
+
+    async def get_recipe_by_category(self, category) -> List[Record]:
+        async with self.pool.acquire() as connection:
+            result = await connection.fetch(f"SELECT * FROM public.recipes WHERE category = '{category}';")
+            return result
+
+    async def remove_recipe(self, recipe_id):
+        async with self.pool.acquire() as connection:
+            await connection.execute(f"DELETE FROM public.recipes WHERE recipe_id = '{recipe_id}';")
