@@ -88,7 +88,9 @@ async def get_random_input_recipe(callback: CallbackQuery):
 @users_router.message(User.random, F.text != 'Отмена')
 async def get_random_input_recipe(msg: Message, state: FSMContext):
     await state.clear()
+    msg_for_del = await msg.answer('🔍 Ищем подходящий рецепт...')
     ai_answer = await ai_recipe(f'Вот какие продукты у меня есть: {msg.text}. Что ты можешь посоветовать приготовить?')
+    await msg_for_del.delete()
     await msg.answer(ai_answer)
 
 
@@ -139,8 +141,8 @@ async def get_ready_recipe_by_category(msg: Message, state: FSMContext):
     category = ((await state.get_state()).split(':'))[1]
     msg_for_del = await msg.answer('🔍 Ищем подходящий рецепт...')
     ai_answer = await ai_recipe(f'Вот какие продукты у меня есть: {msg.text}. {text_for_prompt_dict[category]}')
-    await msg.answer(ai_answer, reply_markup=keys.categories)
     await msg_for_del.delete()
+    await msg.answer(ai_answer, reply_markup=keys.categories)
     await state.clear()
 
 
