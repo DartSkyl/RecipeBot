@@ -111,8 +111,11 @@ async def get_ready_recipe_by_category(callback: CallbackQuery, state: FSMContex
     """Выдаем список готовых рецептов по категориям"""
     category = ((await state.get_state()).split(':'))[1]
     category_recipe_list = await base.get_recipe_by_category(category)
-    await callback.message.edit_text('Список доступных рецептов:',
-                                     reply_markup=await keys.recipe_list_keyboard(category_recipe_list))
+    if len(category_recipe_list) > 0:
+        await callback.message.edit_text('Список доступных рецептов:',
+                                         reply_markup=await keys.recipe_list_keyboard(category_recipe_list))
+    else:
+        await callback.message.answer('Доступных рецептов нет')
 
 
 @users_router.callback_query(User.salads, F.data == 'input')
