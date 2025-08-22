@@ -45,8 +45,8 @@ async def sub_keys(channel_url):
 
 
 admin_menu = ReplyKeyboardMarkup(keyboard=[
-    [KeyboardButton(text='Ссылки на источники')],
     [KeyboardButton(text='Свои рецепты')],
+    [KeyboardButton(text='⬅ Назад')]
 ], resize_keyboard=True)
 
 link_action = InlineKeyboardMarkup(inline_keyboard=[
