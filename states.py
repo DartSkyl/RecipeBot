@@ -13,3 +13,6 @@ class Admin(StatesGroup):
 
 class User(StatesGroup):
     random = State()
+    salads = State()
+    meat = State()
+    desserts = State()

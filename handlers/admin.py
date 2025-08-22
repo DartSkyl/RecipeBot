@@ -185,7 +185,7 @@ async def cath_recipe_link(msg: Message, state: FSMContext):
         recipe_url=msg.text if msg.text != 'Пропустить' else 'empty',
         category=recipe_data['category']
     )
-
+    await state.clear()
     await msg.answer('Рецепт сохранен', reply_markup=keys.admin_menu)
 
     await recipe_list_show_func(msg, recipe_data['category'])

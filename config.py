@@ -10,6 +10,7 @@ else:
 BOT_TOKEN = os.getenv('bot_token')
 ADMINS = {int(i) for i in os.getenv('admins_id').split()}
 MAIN_CHANNEL = int(os.getenv('main_channel'))  # Канал для подписки
+MAIN_CHANNEL_URL = os.getenv('main_channel_url')  # Канал для подписки
 
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 

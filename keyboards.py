@@ -31,6 +31,14 @@ recipe_choice = InlineKeyboardMarkup(inline_keyboard=[
 ])
 
 
+async def sub_keys(channel_url):
+    keys = InlineKeyboardBuilder()
+    keys.button(text='Подписаться', url=channel_url)
+    keys.button(text='Проверить', callback_data='start')
+    keys.adjust(1)
+    return keys.as_markup()
+
+
 # ====================
 # Для админов
 # ====================
@@ -50,6 +58,14 @@ confirm = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='✅ Да', callback_data='yes')],
     [InlineKeyboardButton(text='🚫 Нет', callback_data='no')]
 ])
+
+
+async def recipe_list_keyboard(recipe_list: list):
+    keys = InlineKeyboardBuilder()
+    for r in recipe_list:
+        keys.button(text=r['recipe_name'], callback_data=f'get_{r["recipe_id"]}')
+    keys.adjust(1)
+    return keys.as_markup()
 
 
 async def remove_url(url_list: list):
