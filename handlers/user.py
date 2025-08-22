@@ -66,13 +66,16 @@ async def get_random_ready_recipe(callback: CallbackQuery, state: FSMContext):
     """Достаем любой готовый рецепт"""
     await state.clear()
     await callback.answer()
-    random_ready_recipe = choice(await base.get_all_recipe())
-    msg_text = f'*_Рецепт "{random_ready_recipe["recipe_name"]}":_*\n\n{random_ready_recipe["recipe_content"]}'
+    try:
+        random_ready_recipe = choice(await base.get_all_recipe())
+        msg_text = f'*_Рецепт "{random_ready_recipe["recipe_name"]}":_*\n\n{random_ready_recipe["recipe_content"]}'
 
-    recipe_button = await keys.recipe_url(random_ready_recipe['recipe_url']) \
-        if random_ready_recipe['recipe_url'] != 'empty' else None
+        recipe_button = await keys.recipe_url(random_ready_recipe['recipe_url']) \
+            if random_ready_recipe['recipe_url'] != 'empty' else None
 
-    await callback.message.answer(msg_text, reply_markup=recipe_button, parse_mode='MarkdownV2')
+        await callback.message.answer(msg_text, reply_markup=recipe_button, parse_mode='MarkdownV2')
+    except IndexError:
+        await callback.message.answer('Доступных рецептов нет')
 
 
 @users_router.callback_query(User.random, F.data == 'input')
