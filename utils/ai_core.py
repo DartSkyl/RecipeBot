@@ -1,5 +1,5 @@
 from langchain_openai import ChatOpenAI
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 from config import OPENAI_API_KEY
 
@@ -19,13 +19,21 @@ prompt_text = """
 попросить тебя дать рецепт из любых продуктов. По каждому запросу нужно давать три рецепта.
 Запрос пользователя: {input}
 """
-prompt = PromptTemplate.from_template(prompt_text)
+# prompt = PromptTemplate.from_template(prompt_text)
+prompt = ChatPromptTemplate.from_messages([
+    ('system', prompt_text),
+    MessagesPlaceholder(variable_name='chat_history'),
+    ('human', '{input}')
+])
 
 
-async def ai_recipe(user_products_str):
+async def ai_recipe(user_products_str, chat_history_list):
     """Процесс запроса к ИИ"""
     ai_chain = prompt | model
-    recipe_from_ai = await ai_chain.ainvoke({'input': user_products_str})
+    recipe_from_ai = await ai_chain.ainvoke({
+        'input': user_products_str,
+        'chat_history': chat_history_list,
+    })
     return recipe_from_ai.content
 
 
@@ -42,7 +50,7 @@ if __name__ == '__main__':
         MessagesPlaceholder(variable_name='chat_history'),
         ('human', '{input}')
     ])
-    # .bind_tools([{"type": "web_search_preview"}])
+
     chain = prompt | model
     chat_history = []
 

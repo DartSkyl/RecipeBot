@@ -2,11 +2,8 @@ import string
 from random import choices
 
 from aiogram.types import Message, CallbackQuery
-from aiogram.filters import Command
 from aiogram import F
 from aiogram.fsm.context import FSMContext
-from aiogram.types.chat_member_left import ChatMemberLeft
-from aiogram.exceptions import TelegramBadRequest
 
 from utils.routers import admin_router
 import keyboards as keys

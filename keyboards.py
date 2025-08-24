@@ -26,9 +26,17 @@ categories = ReplyKeyboardMarkup(keyboard=[
 ], resize_keyboard=True)
 
 recipe_choice = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Готовый рецепт', callback_data='ready_recipe')],
-    [InlineKeyboardButton(text='Ввести имеющиеся продукты', callback_data='input')]
+    [InlineKeyboardButton(text='Ввести имеющиеся продукты', callback_data='input')],
+    [InlineKeyboardButton(text='Готовый рецепт', callback_data='ready_recipe')]
 ])
+
+more = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='🔄 Еще варианты', callback_data='more')]
+])
+
+back = ReplyKeyboardMarkup(keyboard=[
+    [KeyboardButton(text='⬅ Назад')]
+], resize_keyboard=True)
 
 
 async def sub_keys(channel_url):
