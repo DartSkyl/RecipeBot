@@ -35,6 +35,7 @@ async def strat_func(msg: Message, state: FSMContext):
 @users_router.message(F.text == '🍲 Случайный рецепт')
 async def random_recipe(msg: Message, state: FSMContext):
     await state.set_state(User.random)
+    await msg.answer('Выберете действие:', reply_markup=keys.back)
     await msg.answer('Посмотреть готовый рецепт или по имеющимся продуктам?', reply_markup=keys.recipe_choice)
 
 
@@ -78,25 +79,6 @@ async def get_random_ready_recipe(callback: CallbackQuery, state: FSMContext):
         await callback.message.answer('Доступных рецептов нет')
 
 
-@users_router.callback_query(User.random, F.data == 'input')
-async def get_random_input_recipe(callback: CallbackQuery):
-    """Просим ИИ дать нам любой рецепт"""
-    await callback.message.delete()
-    await callback.message.answer('Введите список имеющихся у вас продуктов:', reply_markup=keys.cancel)
-
-
-@users_router.message(User.random, F.text != 'Отмена')
-async def get_random_input_recipe(msg: Message, state: FSMContext):
-    # await state.clear()
-    msg_for_del = await msg.answer('🔍 Ищу подходящий рецепт...')
-    user_products_str = f'Вот какие продукты у меня есть: {msg.text}. Что ты можешь посоветовать приготовить?'
-    ai_answer = await ai_recipe(user_products_str, [])
-    await state.set_data({'chat_history': [HumanMessage(content=user_products_str), AIMessage(content=ai_answer)]})
-    await msg_for_del.delete()
-    await msg.answer('Вот что нашел:', reply_markup=keys.back)
-    await msg.answer(ai_answer, reply_markup=keys.more)
-
-
 @users_router.message(F.text.in_(['🥗 Салаты', '🍖 Мясные блюда', '🍰 Десерты']))
 async def salad_category(msg: Message, state: FSMContext):
     """Категория салатов"""
@@ -106,6 +88,7 @@ async def salad_category(msg: Message, state: FSMContext):
         '🍰 Десерты': User.desserts,
     }
     await state.set_state(category_dict[msg.text])
+    await msg.answer('Выберете действие:', reply_markup=keys.back)
     await msg.answer('Посмотреть готовый рецепт или по имеющимся продуктам?', reply_markup=keys.recipe_choice)
 
 
@@ -126,8 +109,9 @@ async def get_ready_recipe_by_category(callback: CallbackQuery, state: FSMContex
 @users_router.callback_query(User.salads, F.data == 'input')
 @users_router.callback_query(User.meat, F.data == 'input')
 @users_router.callback_query(User.desserts, F.data == 'input')
+@users_router.callback_query(User.random, F.data == 'input')
 async def get_ready_recipe_by_category(callback: CallbackQuery):
-    """Выдаем список готовых рецептов по категориям"""
+    """Запрашиваем список имеющихся продуктов"""
     await callback.message.delete()
     await callback.message.answer('Введите список имеющихся у вас продуктов:', reply_markup=keys.cancel)
 
@@ -157,11 +141,14 @@ async def get_more_recipe(callback: CallbackQuery, state: FSMContext):
 @users_router.message(User.salads, F.text != 'Отмена')
 @users_router.message(User.meat, F.text != 'Отмена')
 @users_router.message(User.desserts, F.text != 'Отмена')
+@users_router.message(User.random, F.text != 'Отмена')
 async def get_ready_recipe_by_category(msg: Message, state: FSMContext):
+    """Ловим список имеющихся продуктов и запрашиваем рецепты у ИИ"""
     text_for_prompt_dict = {
         'salads': 'Какой салат я могу из этого приготовить?',
         'meat': 'Какое мясное блюдо я могу из этого приготовить?',
         'desserts': 'Какой десерт я могу из этого приготовить?',
+        'random': 'Что ты можешь посоветовать приготовить?'
     }
     category = ((await state.get_state()).split(':'))[1]
     msg_for_del = await msg.answer('🔍 Ищу подходящий рецепт...')
@@ -171,7 +158,6 @@ async def get_ready_recipe_by_category(msg: Message, state: FSMContext):
     await msg_for_del.delete()
     await msg.answer('Вот что нашел:', reply_markup=keys.back)
     await msg.answer(ai_answer, reply_markup=keys.more)
-    # await state.clear()
 
 
 @users_router.message(F.text == 'Отмена')
