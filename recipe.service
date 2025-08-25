@@ -1,0 +1,14 @@
+[Unit]
+Description=RecipeBot
+After=postgresql.service
+
+[Service]
+Type=simple
+Restart=always
+User=root
+WorkingDirectory=/root/RecipeBot
+ExecStart=/root/RecipeBot/recipe/bin/python3 /root/RecipeBot/main.py
+OOMScoreAdjust=-1000
+
+[Install]
+WantedBy=multi-user.target
